@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=SNTL-RemoteAccess
+NoDisplay=true
+MimeType=x-scheme-handler/SNTL-RemoteAccess;
+TryExec=SNTL-RemoteAccess
+Exec=SNTL-RemoteAccess %u
+Icon=SNTL-RemoteAccess
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=SNTL-RemoteAccess
