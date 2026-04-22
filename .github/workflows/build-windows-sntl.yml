@@ -27,17 +27,27 @@ jobs:
       - name: Install LLVM
         run: choco install llvm -y
 
-      - name: Setup Flutter 3.24.0
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.24.0"
-          channel: "stable"
-          cache: false
+      - name: Install Flutter 3.41.7 manuellement
+        shell: pwsh
+        run: |
+          $url = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.41.7-stable.zip"
+          Write-Host "Téléchargement Flutter 3.41.7..."
+          Invoke-WebRequest -Uri $url -OutFile "C:\flutter.zip"
+          Write-Host "Extraction..."
+          Expand-Archive -Path "C:\flutter.zip" -DestinationPath "C:\flutter-sdk" -Force
+          echo "C:\flutter-sdk\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Write-Host "✅ Flutter installé"
+
+      - name: Vérifier Flutter
+        shell: pwsh
+        run: |
+          $env:Path = "C:\flutter-sdk\flutter\bin;$env:Path"
+          flutter --version
 
       - name: Flutter pub get
         shell: pwsh
         run: |
-          $env:Path = "$env:FLUTTER_ROOT\bin;$env:Path"
+          $env:Path = "C:\flutter-sdk\flutter\bin;$env:Path"
           Set-Location "$env:GITHUB_WORKSPACE\flutter"
           flutter config --no-analytics
           flutter pub get
@@ -48,7 +58,7 @@ jobs:
       - name: Build Flutter Windows
         shell: pwsh
         run: |
-          $env:Path = "$env:FLUTTER_ROOT\bin;$env:Path"
+          $env:Path = "C:\flutter-sdk\flutter\bin;$env:Path"
           Set-Location "$env:GITHUB_WORKSPACE\flutter"
           flutter build windows --release
 
@@ -58,9 +68,10 @@ jobs:
           $src = "$env:GITHUB_WORKSPACE\flutter\build\windows\x64\runner\Release\rustdesk.exe"
           if (Test-Path $src) {
             Rename-Item -Path $src -NewName "SNTL-RemoteAccess.exe"
-            Write-Host "✅ Renommé avec succès"
+            Write-Host "✅ Renommé"
           } else {
             Write-Host "❌ Fichier non trouvé : $src"
+            Get-ChildItem "$env:GITHUB_WORKSPACE\flutter\build\windows\x64\runner\Release\"
             exit 1
           }
 
