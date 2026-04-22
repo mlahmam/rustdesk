@@ -34,15 +34,17 @@ jobs:
         run: choco install llvm -y
 
       - name: Flutter pub get
-        working-directory: flutter
-        run: flutter pub get
+        run: |
+          cd flutter
+          flutter pub get
 
       - name: Cargo fetch
         run: cargo fetch
 
       - name: Build Flutter Windows
-        working-directory: flutter
-        run: flutter build windows --release
+        run: |
+          cd flutter
+          flutter build windows --release
 
       - name: Rename executable
         run: |
