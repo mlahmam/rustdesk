@@ -1,0 +1,54 @@
+name: Build SNTL-RemoteAccess Windows
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.75.0'
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          cargo fetch
+
+      - name: Build Flutter Windows
+        run: flutter build windows --release
+
+      - name: Rename executable
+        run: |
+          mv build\windows\x64\runner\Release\rustdesk.exe `
+             build\windows\x64\runner\Release\SNTL-RemoteAccess.exe
+
+      - name: Build installer Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: res/setup.iss
+          options: /O+
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: SNTL-RemoteAccess-Windows-Setup
+          path: Output\SNTL-RemoteAccess-Setup.exe
+          retention-days: 30
