@@ -27,10 +27,10 @@ jobs:
       - name: Install LLVM
         run: choco install llvm -y
 
-      - name: Setup Flutter
+      - name: Setup Flutter 3.24.0
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.0"
+          flutter-version: "3.24.0"
           channel: "stable"
           cache: false
 
@@ -39,8 +39,7 @@ jobs:
         run: |
           $env:Path = "$env:FLUTTER_ROOT\bin;$env:Path"
           Set-Location "$env:GITHUB_WORKSPACE\flutter"
-          Write-Host "Current dir: $(Get-Location)"
-          Write-Host "pubspec.yaml exists: $(Test-Path pubspec.yaml)"
+          flutter config --no-analytics
           flutter pub get
 
       - name: Cargo fetch
@@ -57,7 +56,6 @@ jobs:
         shell: pwsh
         run: |
           $src = "$env:GITHUB_WORKSPACE\flutter\build\windows\x64\runner\Release\rustdesk.exe"
-          $dst = "$env:GITHUB_WORKSPACE\flutter\build\windows\x64\runner\Release\SNTL-RemoteAccess.exe"
           if (Test-Path $src) {
             Rename-Item -Path $src -NewName "SNTL-RemoteAccess.exe"
             Write-Host "✅ Renommé avec succès"
