@@ -54,6 +54,7 @@ jobs:
         run: |
           $env:Path = "C:\flutter\bin;$env:Path"
           Set-Location "$env:GITHUB_WORKSPACE\flutter"
+          flutter precache --windows
           flutter build windows --release
 
       - name: Rename executable
@@ -61,8 +62,10 @@ jobs:
         run: |
           $base = "$env:GITHUB_WORKSPACE\flutter\build\windows\x64\runner\Release"
           Get-ChildItem $base
-          Rename-Item -Path "$base\rustdesk.exe" -NewName "SNTL-RemoteAccess.exe"
-          Write-Host "✅ Renommé"
+          $exe = Get-ChildItem -Path $base -Filter *.exe | Select-Object -First 1
+          if (-not $exe) { throw "No executable found in $base" }
+          Rename-Item -Path $exe.FullName -NewName "SNTL-RemoteAccess.exe"
+          Write-Host "✅ Renommé $($exe.Name) -> SNTL-RemoteAccess.exe"
 
       - name: Build installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
